@@ -55,7 +55,8 @@ func (self *ProtoTestServer) Connect(nodeId string, port uint32, network wire.Bi
 	if err != nil {
 		return err
 	}
-	hostname := fmt.Sprintf("127.0.01:%d", &port)
+	hostname := fmt.Sprintf("127.0.0.1:%d", port)
+	fmt.Printf("\n*******%s******\n", hostname)
 	addr, err := net.ResolveTCPAddr("tcp", hostname)
 	if err != nil {
 		return err

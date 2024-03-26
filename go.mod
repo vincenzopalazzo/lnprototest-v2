@@ -1,6 +1,6 @@
 module github.com/vincenzopalazzo/lnprototest-v2
 
-go 1.23
+go 1.22
 
 require (
 	github.com/akamensky/argparse v1.4.0
@@ -37,6 +37,7 @@ require (
 	github.com/lightningnetwork/lnd/tlv v1.0.3 // indirect
 	github.com/lightningnetwork/lnd/tor v1.0.1 // indirect
 	github.com/miekg/dns v1.1.43 // indirect
+	github.com/sourcegraph/jsonrpc2 v0.2.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/net v0.21.0 // indirect

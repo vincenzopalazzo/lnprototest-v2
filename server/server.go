@@ -1,12 +1,13 @@
 package server
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net"
-	"net/rpc"
-	"net/rpc/jsonrpc"
 	"os"
+
+	"github.com/sourcegraph/jsonrpc2"
 
 	"github.com/vincenzopalazzo/lnprototest-v2/lnprototest"
 )
@@ -15,30 +16,17 @@ var lnprototestServer *lnprototest.ProtoTestServer = nil
 
 type Server struct {
 	dataDir string
+	context context.Context
 }
 
 func Make(datadir string) (*Server, error) {
 	return &Server{
 		dataDir: datadir,
+		context: context.Background(),
 	}, nil
 }
 
-func (self *Server) RegisterRPCs() error {
-	if err := rpc.Register(new(ConnectRPC)); err != nil {
-		return err
-	}
-
-	if err := rpc.Register(new(SendRPC)); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (self *Server) Listen() error {
-	if err := self.RegisterRPCs(); err != nil {
-		return err
-	}
-
 	unixPath := fmt.Sprintf("%s/lnprototest.sock", self.dataDir)
 	if _, err := os.Stat(unixPath); !errors.Is(err, os.ErrNotExist) {
 		os.Remove(unixPath)
@@ -62,6 +50,7 @@ func (self *Server) Listen() error {
 		if err != nil {
 			continue
 		}
-		go jsonrpc.ServeConn(conn)
+
+		_ = jsonrpc2.NewConn(self.context, jsonrpc2.NewPlainObjectStream(conn), &RPCHandler{})
 	}
 }
