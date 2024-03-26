@@ -14,6 +14,9 @@ import (
 type ConnectRPC struct {
 	NodeId string
 	Port   uint32
+	// Afeter the connection we should have a
+	// init message from the node
+	Msg string
 }
 
 func ConnectCall(request *json.RawMessage, response *json.RawMessage) error {
@@ -22,10 +25,15 @@ func ConnectCall(request *json.RawMessage, response *json.RawMessage) error {
 	if err := json.Unmarshal(*request, &connect); err != nil {
 		return nil
 	}
-	if err := lnprototestServer.Connect(connect.NodeId, connect.Port, wire.SimNet); err != nil {
+	resp, err := lnprototestServer.Connect(connect.NodeId, connect.Port, wire.SimNet)
+	if err != nil {
 		return err
 	}
-	*response = *request
+	connect.Msg = hex.EncodeToString(resp.Bytes())
+	*response, err = json.Marshal(connect)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

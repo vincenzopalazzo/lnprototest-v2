@@ -50,16 +50,15 @@ func Make() (*ProtoTestServer, error) {
 // / Connect - Perform the connection with the peer with
 // / the provided public key (aka nodeId) that it is listening
 // / on the specified port.
-func (self *ProtoTestServer) Connect(nodeId string, port uint32, network wire.BitcoinNet) error {
+func (self *ProtoTestServer) Connect(nodeId string, port uint32, network wire.BitcoinNet) (*bytes.Buffer, error) {
 	pubkey, err := StringToPubKey(nodeId)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	hostname := fmt.Sprintf("127.0.0.1:%d", port)
-	fmt.Printf("\n*******%s******\n", hostname)
 	addr, err := net.ResolveTCPAddr("tcp", hostname)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	wireaddr := lnwire.NetAddress{
 		Address:     addr,
@@ -68,21 +67,35 @@ func (self *ProtoTestServer) Connect(nodeId string, port uint32, network wire.Bi
 	}
 	conn, err := brontide.Dial(&self.PrivKeyECDH, &wireaddr, time.Second*3, net.DialTimeout)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	self.Conn = conn
-	return nil
+	if err := self.Conn.SetDeadline(time.Now().Add(time.Second)); err != nil {
+		return nil, err
+	}
+	return self.Receive()
 }
 
 // / Send - Send an message to the connection
 func (self *ProtoTestServer) Send(buff *bytes.Buffer) error {
+	size, err := self.Conn.Write(buff.Bytes())
+	if err != nil {
+		return err
+	}
+	if size == 0 {
+		return fmt.Errorf("No message to flush")
+	}
 	return nil
 }
 
 // / Send - Wait a message from the connection, usually this is
 // / an answer from a previous send message
 func (self *ProtoTestServer) Receive() (*bytes.Buffer, error) {
-	return nil, nil
+	buff, err := self.Conn.ReadNextMessage()
+	if err != nil {
+		return nil, err
+	}
+	return bytes.NewBuffer(buff), nil
 }
 
 // / Destroy - Stop the connecto for lnprototest
