@@ -1,6 +1,6 @@
 module github.com/vincenzopalazzo/lnprototest-v2
 
-go 1.22.1
+go 1.23
 
 require (
 	github.com/akamensky/argparse v1.4.0
