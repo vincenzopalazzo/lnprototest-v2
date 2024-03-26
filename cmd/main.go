@@ -1,6 +1,6 @@
-// / Lightning Network protocol integration tests
-// /
-// / Author: Vincenzo Palazzo <vincenzopalazzo@member.fsf.org>
+// Lightning Network protocol integration tests
+//
+// Author: Vincenzo Palazzo <vincenzopalazzo@member.fsf.org>
 package main
 
 import (
@@ -8,6 +8,8 @@ import (
 	"os"
 
 	"github.com/akamensky/argparse"
+
+	"github.com/vincenzopalazzo/lnprototest-v2/server"
 )
 
 type CmdParser struct {
@@ -31,8 +33,6 @@ func buildCmdParser() (*CmdParser, error) {
 		return nil, err
 	}
 	dataDir := parser.String("d", "data-dir", &argparse.Options{Required: false, Default: home, Help: "data directory for ocean market deamon"})
-	_ = parser.Int("p", "port", &argparse.Options{Required: false, Default: 9090, Help: "Default port where the liquidity provider will listen"})
-	_ = parser.String("a", "address", &argparse.Options{Required: false, Default: "127.0.0.1", Help: "Host where the liquidity provider will listen about new connection"})
 	network := parser.String("n", "network", &argparse.Options{Required: false, Default: "testnet", Help: "The Bitcoin Network"})
 	return &CmdParser{parser: parser, dataDir: dataDir, network: network}, nil
 }
@@ -45,5 +45,13 @@ func main() {
 
 	if err := parser.Parse(os.Args); err != nil {
 		panic(parser.Usage(err))
+	}
+
+	server, err := server.Make(*parser.dataDir)
+	if err != nil {
+		panic(err)
+	}
+	if err := server.Listen(); err != nil {
+		panic(err)
 	}
 }

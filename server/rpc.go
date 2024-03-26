@@ -1,4 +1,4 @@
-package main
+package server
 
 import (
 	"bytes"
@@ -7,12 +7,12 @@ import (
 	"github.com/btcsuite/btcd/wire"
 )
 
-type ConnectRequest struct {
+type ConnectRPC struct {
 	NodeId string
 	port   uint64
 }
 
-func Connect(request *ConnectRequest, response *ConnectRequest) error {
+func (_ *ConnectRPC) Call(request *ConnectRPC, response *ConnectRPC) error {
 	if err := lnprototestServer.Connect(request.NodeId, uint32(request.port), wire.SimNet); err != nil {
 		return err
 	}
@@ -21,11 +21,11 @@ func Connect(request *ConnectRequest, response *ConnectRequest) error {
 	return nil
 }
 
-type SendRequest struct {
+type SendRPC struct {
 	msg string
 }
 
-func Send(request *SendRequest, response *SendRequest) error {
+func (_ *SendRPC) Call(request *SendRPC, response *SendRPC) error {
 	buff, err := hex.DecodeString(request.msg)
 	if err != nil {
 		return err

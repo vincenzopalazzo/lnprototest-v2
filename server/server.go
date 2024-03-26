@@ -1,6 +1,7 @@
-package main
+package server
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"net/rpc"
@@ -23,8 +24,12 @@ func Make(datadir string) (*Server, error) {
 }
 
 func (self *Server) RegisterRPCs() error {
-	if err := rpc.Register(Connect); err != nil {
-		return nil
+	if err := rpc.Register(new(ConnectRPC)); err != nil {
+		return err
+	}
+
+	if err := rpc.Register(new(SendRPC)); err != nil {
+		return err
 	}
 	return nil
 }
@@ -35,6 +40,10 @@ func (self *Server) Listen() error {
 	}
 
 	unixPath := fmt.Sprintf("%s/lnprototest.sock", self.dataDir)
+	if _, err := os.Stat(unixPath); !errors.Is(err, os.ErrNotExist) {
+		os.Remove(unixPath)
+	}
+
 	listener, err := net.Listen("unix", unixPath)
 	if err != nil {
 		return err
