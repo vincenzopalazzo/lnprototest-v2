@@ -111,7 +111,9 @@ pub fn parse_args() -> Result<ProtoTestCliArgs, lexopt::Error> {
 pub fn print_help() {
     println!(
         "{}",
-        term::format::secondary("Common `lnprototest-cli` commands used to init the lnprototest deamon")
+        term::format::secondary(
+            "Common `lnprototest-cli` commands used to init the lnprototest deamon"
+        )
     );
     println!(
         "\n{} {}",

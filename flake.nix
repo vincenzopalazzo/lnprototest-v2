@@ -33,6 +33,7 @@
             golangci-lint
 
             go
+            rustup
 
             # integration test dependencies
             clightning

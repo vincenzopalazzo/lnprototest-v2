@@ -1,0 +1,8 @@
+[package]
+name = "lnprototest-socket"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+lampo-common = { git = "https://github.com/vincenzopalazzo/lampo.rs.git"}
+log = "*"
