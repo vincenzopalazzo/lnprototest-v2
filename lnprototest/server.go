@@ -35,7 +35,7 @@ func MakeKeys() (*keychain.PrivKeyECDH, error) {
 	return &keychain.PrivKeyECDH{PrivKey: remotePriv}, nil
 }
 
-// / Make - Make a new ProtoTestServer with a random private key
+// Make - Make a new ProtoTestServer with a random private key
 func Make() (*ProtoTestServer, error) {
 	xpriv, err := MakeKeys()
 	if err != nil {
@@ -70,20 +70,13 @@ func (self *ProtoTestServer) Connect(nodeId string, port uint32, network wire.Bi
 		return nil, err
 	}
 	self.Conn = conn
-	if err := self.Conn.SetDeadline(time.Now().Add(time.Second)); err != nil {
-		return nil, err
-	}
 	return self.Receive()
 }
 
 // / Send - Send an message to the connection
 func (self *ProtoTestServer) Send(buff *bytes.Buffer) error {
-	size, err := self.Conn.Write(buff.Bytes())
-	if err != nil {
+	if _, err := self.Conn.Write(buff.Bytes()); err != nil {
 		return err
-	}
-	if size == 0 {
-		return fmt.Errorf("No message to flush")
 	}
 	return nil
 }

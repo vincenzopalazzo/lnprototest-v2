@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/akamensky/argparse"
+	"github.com/charmbracelet/log"
 
 	"github.com/vincenzopalazzo/lnprototest-v2/server"
 )
@@ -38,6 +39,8 @@ func buildCmdParser() (*CmdParser, error) {
 }
 
 func main() {
+	log.SetLevel(log.DebugLevel)
+	log.Info("Starting the Lightning Network protocol test deamon")
 	parser, err := buildCmdParser()
 	if err != nil {
 		panic(fmt.Errorf("%s", err))
