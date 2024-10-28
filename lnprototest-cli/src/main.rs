@@ -34,13 +34,17 @@ fn main() -> io::Result<()> {
 
 fn run(args: ProtoTestCliArgs) -> io::Result<json::Value> {
     let mut client = UnixStream::connect(&format!("{}/lnprototest.sock", args.datadir))?;
-    to_writer(&mut client, &json::json!({
-        "id": "lnprototest/1",
-        "method": args.method,
-        "params": args.args,
-    }))?;
+    to_writer(
+        &mut client,
+        &json::json!({
+            "id": "lnprototest/1",
+            "method": args.method,
+            "params": args.args,
+        }),
+    )?;
     let response: json::Value = Deserializer::from_reader(&mut client)
-            .into_iter()
-            .next().unwrap()?;
+        .into_iter()
+        .next()
+        .unwrap()?;
     Ok(response)
 }
