@@ -8,6 +8,7 @@ import (
 	"fmt"
 
 	"github.com/btcsuite/btcd/wire"
+	"github.com/charmbracelet/log"
 	"github.com/sourcegraph/jsonrpc2"
 )
 
@@ -21,15 +22,17 @@ type ConnectRPC struct {
 
 func ConnectCall(request *json.RawMessage, response *json.RawMessage) error {
 	var connect ConnectRPC
-	fmt.Println(string(*request))
+	log.Infof("%s", string(*request))
 	if err := json.Unmarshal(*request, &connect); err != nil {
 		return nil
 	}
+	log.Infof("Connect to %s:%d", connect.NodeId, connect.Port)
 	resp, err := lnprototestServer.Connect(connect.NodeId, connect.Port, wire.SimNet)
 	if err != nil {
 		return err
 	}
 	connect.Msg = hex.EncodeToString(resp.Bytes())
+	log.Infof("Connected response %s", connect.Msg)
 	*response, err = json.Marshal(connect)
 	if err != nil {
 		return err
@@ -46,17 +49,20 @@ func SendCall(request *json.RawMessage, response *json.RawMessage) error {
 	if err := json.Unmarshal(*request, &sendCall); err != nil {
 		return nil
 	}
+
+	log.Debugf("Trying to send %s", sendCall.Msg)
 	buff, err := hex.DecodeString(sendCall.Msg)
 	if err != nil {
 		return err
 	}
-
 	if err := lnprototestServer.Send(bytes.NewBuffer(buff)); err != nil {
+		log.Errorf("Error sending the message %s", err)
 		return err
 	}
-
+	log.Infof("Message sent %s", sendCall.Msg)
 	buffResp, err := lnprototestServer.Receive()
 	if err != nil {
+		log.Errorf("Error receiving the message %s", err)
 		return err
 	}
 
@@ -65,6 +71,7 @@ func SendCall(request *json.RawMessage, response *json.RawMessage) error {
 	}
 
 	sendCall.Msg = hex.EncodeToString(buffResp.Bytes())
+	log.Infof("Message received %s", sendCall.Msg)
 	*response, err = json.Marshal(sendCall)
 	return err
 }
@@ -73,6 +80,7 @@ type RPCHandler struct{}
 
 // Handle implements the jsonrpc2.Handler interface.
 func (h *RPCHandler) Handle(ctx context.Context, c *jsonrpc2.Conn, r *jsonrpc2.Request) {
+	log.Debugf("Received request: %s", r.Method)
 	switch r.Method {
 	case "connect":
 		var response json.RawMessage
